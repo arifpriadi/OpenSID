@@ -35,6 +35,8 @@
  *
  */
 
+use App\Models\SinergiProgram;
+
 defined('BASEPATH') || exit('No direct script access allowed');
 
 class Web_widget extends Admin_Controller
@@ -128,6 +130,10 @@ class Web_widget extends Admin_Controller
 
     public function admin($widget)
     {
+        if ($widget == 'sinergi_program') {
+            return view('admin.widget.sinergi_program.index');
+        }
+
         $data['form_action'] = site_url('web_widget/update_setting/' . $widget);
         $data['setting']     = $this->web_widget_model->get_setting($widget);
 
@@ -212,11 +218,101 @@ class Web_widget extends Admin_Controller
 
     private function cek_tidy()
     {
-        if (! in_array('tidy', get_loaded_extensions())) {
+        if (!in_array('tidy', get_loaded_extensions())) {
             $this->session->success   = -1;
             $this->session->error_msg = '<br/>Ektensi <code>tidy</code> tidak aktif. Silahkan cek <a href="' . site_url('info_sistem') . '"><b>Pengaturan > Info Sistem > Kebutuhan Sistem.</a></b>';
 
             redirect($this->controller);
         }
+    }
+
+    // Widget
+    public function datatables()
+    {
+        if ($this->input->is_ajax_request()) {
+            return datatables()->of(SinergiProgram::query())
+                ->addColumn('ceklist', static function ($row) {
+                    if (can('h')) {
+                        return '<input type="checkbox" name="id_cb[]" value="' . $row->id . '"/>';
+                    }
+                })
+                ->addIndexColumn()
+                ->addColumn('aksi', static function ($row) {
+                    $aksi = '';
+
+                    if (can('u')) {
+                        $aksi .= '<a href="' . route('web_widget.sinergi_form', $row->id) . '" class="btn btn-warning btn-sm"  title="Ubah Data"><i class="fa fa-edit"></i></a> ';
+                    }
+
+                    if (can('h')) {
+                        $aksi .= '<a href="#" data-href="' . route('web_widget.sinergi_delete', $row->id) . '" class="btn bg-maroon btn-sm"  title="Hapus Data" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash"></i></a> ';
+                    }
+
+                    return $aksi;
+                })
+                ->rawColumns(['ceklist', 'aksi'])
+                ->make();
+        }
+
+        return show_404();
+    }
+
+    public function sinergi_form($id = '')
+    {
+        $this->redirect_hak_akses('u');
+
+        if ($id) {
+            $action      = 'Ubah';
+            $form_action = route('web_widget.sinergi_update', $id);
+            $sinergi_program = SinergiProgram::findOrFail($id);
+        } else {
+            $action           = 'Tambah';
+            $form_action      = route('web_widget.sinergi_insert');
+            $sinergi_program = null;
+        }
+
+        return view("admin.widget.sinergi_program.form", compact('action', 'form_action', 'sinergi_program'));
+    }
+
+    public function sinergi_insert()
+    {
+        $this->redirect_hak_akses('u');
+
+        if (SinergiProgram::create(static::sinergi_validate($this->request))) {
+            redirect_with('success', 'Berhasil Tambah Data', 'web_widget/admin/sinergi_program');
+        }
+        redirect_with('error', 'Gagal Tambah Data', 'web_widget/admin/sinergi_program');
+    }
+
+    public function sinergi_update($id = '')
+    {
+        $this->redirect_hak_akses('u');
+
+        $data = SinergiProgram::findOrFail($id);
+
+        if ($data->update(static::sinergi_validate($this->request))) {
+            redirect_with('success', 'Berhasil Ubah Data', 'web_widget/admin/sinergi_program');
+        }
+        redirect_with('error', 'Gagal Ubah Data', 'web_widget/admin/sinergi_program');
+    }
+
+    public function sinergi_delete($id = '')
+    {
+        $this->redirect_hak_akses('h');
+
+        if (SinergiProgram::destroy($this->request['id_cb'] ?? $id)) {
+            redirect_with('success', 'Berhasil Hapus Data', 'web_widget/admin/sinergi_program');
+        }
+        redirect_with('error', 'Gagal Hapus Data', 'web_widget/admin/sinergi_program');
+    }
+
+    // Hanya filter inputan
+    protected static function sinergi_validate($request = [])
+    {
+        return [
+            'judul' => judul($request['judul']),
+            'tautan' => htmlentities($request['tautan']),
+            'gambar' => $request['gambar']
+        ];
     }
 }
