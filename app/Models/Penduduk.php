@@ -104,6 +104,7 @@ class Penduduk extends BaseModel
     protected $appends = [
         'usia',
         'alamat_wilayah',
+        'koordinat',
     ];
 
     /**
@@ -334,7 +335,7 @@ class Penduduk extends BaseModel
      */
     public function getWajibKTPAttribute()
     {
-        return (($this->tanggallahir->age > 16) || (! empty($this->status_kawin) && $this->status_kawin != 1))
+        return (($this->tanggallahir->age > 16) || (!empty($this->status_kawin) && $this->status_kawin != 1))
             ? 'WAJIB KTP'
             : 'BELUM';
     }
@@ -379,12 +380,12 @@ class Penduduk extends BaseModel
      */
     public function getStatusPerkawinanAttribute()
     {
-        return ! empty($this->status_kawin) && $this->status_kawin != 2
+        return !empty($this->status_kawin) && $this->status_kawin != 2
             ? $this->statusKawin->nama
             : (
                 empty($this->akta_perkawinan)
-                    ? 'KAWIN BELUM TERCATAT'
-                    : 'KAWIN TERCATAT'
+                ? 'KAWIN BELUM TERCATAT'
+                : 'KAWIN TERCATAT'
             );
     }
 
@@ -405,7 +406,7 @@ class Penduduk extends BaseModel
      */
     public function getNamaAsuransiAttribute()
     {
-        return ! empty($this->id_asuransi) && $this->id_asuransi != 1
+        return !empty($this->id_asuransi) && $this->id_asuransi != 1
             ? (($this->id_asuransi == 99)
                 ? "Nama/No Asuransi : {$this->no_asuransi}"
                 : "No Asuransi : {$this->no_asuransi}")
@@ -487,10 +488,20 @@ class Penduduk extends BaseModel
 
     public function getAlamatWilayahAttribute()
     {
-        if (! in_array($this->id_kk, [0, null])) {
+        if (!in_array($this->id_kk, [0, null])) {
             return $this->keluarga->alamat . ' RT ' . $this->keluarga->wilayah->rt . ' / RW ' . $this->keluarga->wilayah->rw . ' ' . ucwords(setting('sebutan_dusun') . ' ' . $this->keluarga->wilayah->dusun);
         }
 
         return $this->alamat_sekarang . ' RT ' . $this->wilayah->rt . ' / RW ' . $this->wilayah->rw . ' ' . ucwords(setting('sebutan_dusun') . ' ' . $this->wilayah->dusun);
+    }
+
+    /**
+     * Getter untuk koordinat.
+     *
+     * @return string
+     */
+    public function getKoordinatAttribute()
+    {
+        return $this->rtm->koordinat ?? $this->keluarga->koordinat ?? PendudukMap::find($this->id);
     }
 }

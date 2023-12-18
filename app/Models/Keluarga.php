@@ -70,6 +70,15 @@ class Keluarga extends BaseModel
     ];
 
     /**
+     * The appends with the model.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'koordinat',
+    ];
+
+    /**
      * Define a one-to-one relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
@@ -109,5 +118,15 @@ class Keluarga extends BaseModel
         return static::whereHas('kepalaKeluarga', static function ($query) {
             $query->status()->where('kk_level', '1');
         });
+    }
+
+    /**
+     * Getter untuk koordinat.
+     *
+     * @return string
+     */
+    public function getKoordinatAttribute()
+    {
+        return PendudukMap::find($this->id);
     }
 }
