@@ -256,3 +256,5 @@ define('maxPhpVersion', '8.2.0');
 define('minMySqlVersion', '5.6.0');
 define('maxMySqlVersion', '8.0.0');
 define('minMariaDBVersion', '10.3.0');
+
+define('IS_PREMIUM', true);
