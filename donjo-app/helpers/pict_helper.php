@@ -300,12 +300,11 @@ function UploadGallery(string $fupload_name, $old_foto = '', $tipe_file = ''): b
     $ci                      = &get_instance();
     $config['upload_path']   = LOKASI_GALERI;
     $config['allowed_types'] = 'gif|jpg|png|jpeg';
-    $config['max_size']      = 2048; // 2MB
     $ci->load->library('upload');
     $ci->upload->initialize($config);
 
     if (! $ci->upload->do_upload('gambar')) {
-        redirect_with('error', $ci->upload->display_errors());
+        session_error($ci->upload->display_errors());
     } else {
         $uploadedImage = $ci->upload->data();
         ResizeGambar($uploadedImage['full_path'], LOKASI_GALERI . 'kecil_' . $fupload_name, ['width' => 440, 'height' => 440]);
@@ -373,8 +372,13 @@ function UploadArtikel(string $fupload_name, $gambar): bool
         return false;
     }
     $uploadedImage = $ci->upload->data();
-    ResizeGambar($uploadedImage['full_path'], LOKASI_FOTO_ARTIKEL . 'kecil_' . $fupload_name, ['width' => 440, 'height' => 440]);
-    ResizeGambar($uploadedImage['full_path'], LOKASI_FOTO_ARTIKEL . 'sedang_' . $fupload_name, ['width' => 880, 'height' => 880]);
+    $filePath = $uploadedImage['full_path'];
+    
+    // Pastikan file berhasil diunggah sebelum mengubah nama
+    if (!empty($filePath)) {
+        copy($filePath, LOKASI_FOTO_ARTIKEL . 'kecil_' . $fupload_name);
+        copy($filePath, LOKASI_FOTO_ARTIKEL . 'sedang_' . $fupload_name);
+    }
 
     unlink($uploadedImage['full_path']);
 
