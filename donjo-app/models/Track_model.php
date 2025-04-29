@@ -52,6 +52,8 @@ class Track_model extends CI_Model
 {
     public function track_desa($dari): void
     {
+        return;
+
         if ($this->setting->enable_track == false || null === identitas()) {
             return;
         }
