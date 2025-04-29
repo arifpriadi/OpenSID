@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\SettingAplikasi;
-
 /*
  *
  * File ini bagian dari:
@@ -37,13 +35,15 @@ use App\Models\SettingAplikasi;
  *
  */
 
+use App\Models\Modul;
+
 defined('BASEPATH') || exit('No direct script access allowed');
 
 class Migrasi_rev extends MY_model
 {
     public function up()
     {
-        SettingAplikasi::whereIn('slug', ['layanan-pelanggan', 'pendaftaran-kerjasama'])->delete();
+        Modul::whereIn('slug', ['layanan-pelanggan', 'pendaftaran-kerjasama'])->delete();
 
         cache()->flush();
     }
