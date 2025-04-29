@@ -53,7 +53,7 @@ class Setting_model extends MY_Model
 
         $CI->list_setting = SettingAplikasi::orderBy('key')->get();
         $CI->setting      = (object) $CI->list_setting->pluck('value', 'key')
-            ->map(static fn ($value, $key) => SebutanDesa($value))
+            ->map(static fn($value, $key) => SebutanDesa($value))
             ->toArray();
 
         $this->apply_setting();
@@ -230,9 +230,9 @@ class Setting_model extends MY_Model
 
                 $hasil                 = $hasil && $this->update($key, $value);
                 $this->setting->{$key} = $value;
-                if ($key == 'enable_track') {
-                    $hasil = $hasil && $this->notifikasi_tracker();
-                }
+                // if ($key == 'enable_track') {
+                //     $hasil = $hasil && $this->notifikasi_tracker();
+                // }
             }
         }
         // model seperti diatas tidak bisa otomatis invalidated cache, jadi harus dihapus manual
@@ -322,7 +322,7 @@ class Setting_model extends MY_Model
     public function aktifkan_tracking(): void
     {
         // ini bisa otomatis invalidate cache
-        (SettingAplikasi::where('key', 'enable_track')->first())->update(['value' => 1]);
+        // (SettingAplikasi::where('key', 'enable_track')->first())->update(['value' => 1]);
         status_sukses(1);
     }
 
