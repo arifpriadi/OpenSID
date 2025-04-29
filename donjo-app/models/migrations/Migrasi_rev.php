@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\SettingAplikasi;
+
 /*
  *
  * File ini bagian dari:
@@ -41,12 +43,8 @@ class Migrasi_rev extends MY_model
 {
     public function up()
     {
-        return true;
+        SettingAplikasi::whereIn('slug', ['layanan-pelanggan', 'pendaftaran-kerjasama'])->delete();
 
-        // Migrasi berdasarkan config_id
-        // $config_id = DB::table('config')->pluck('id')->toArray();
-
-        // foreach ($config_id as $id) {
-        // }
+        cache()->flush();
     }
 }
