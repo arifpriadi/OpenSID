@@ -35,6 +35,7 @@
  *
  */
 
+use App\Models\Modul;
 use App\Models\Migrasi;
 use App\Models\SettingAplikasi;
 use Illuminate\Support\Facades\DB;
@@ -97,8 +98,9 @@ class Database_model extends MY_Model
         $migratedDatabase = Migrasi::pluck('versi_database', 'versi_database')->toArray();
 
         session_success();
-        $versi        = (int) str_replace('.', '', $this->cekCurrentVersion());
-        $minimumVersi = (int) str_replace('.', '', $this->minimumVersion);
+        $versi          = (int) str_replace('.', '', $this->cekCurrentVersion());
+        $minimumVersi   = (int) str_replace('.', '', $this->minimumVersion);
+        $currentVersion = currentVersion();
 
         if (! $install && $versi < $minimumVersi) {
             show_error('<h2>Silakan upgrade dulu ke OpenSID dengan minimal versi ' . $this->minimumVersion . '</h2>');
@@ -131,20 +133,35 @@ class Database_model extends MY_Model
             }
         }
 
+        // Migrasi Surat Bawaan
+        $this->jalankan_migrasi('migrasi_surat_bawaan');
+
         // Migrasi beta
         $this->jalankan_migrasi('migrasi_beta');
 
         // Migrasi revisi
         $this->jalankan_migrasi('migrasi_rev');
 
+        // Migrasi umum
+        $this->jalankan_migrasi('migrasi_umum');
+
+        // Migrasi view
         $this->createView();
+
+        // Migrasi Hapus Module
+        Modul::whereIn('slug', ['layanan-pelanggan', 'pendaftaran-kerjasama'])->delete();
+
+        cache()->flush();
 
         // Lengkapi folder desa
         folder_desa();
         kosongkanFolder(config_item('cache_blade'));
-        // cache()->flush();
 
-        SettingAplikasi::withoutGlobalScope(App\Scopes\ConfigIdScope::class)->where('key', '=', 'current_version')->update(['value' => currentVersion()]);
+        // delete cache list path view blade
+        cache()->forget('views_blade');
+
+        SettingAplikasi::withoutGlobalScope(App\Scopes\ConfigIdScope::class)->where('key', '=', 'current_version')->update(['value' => $currentVersion]);
+        SettingAplikasi::where(['key' => 'compatible_version_general'])->update(['value' => versiUmumSetara($currentVersion)]);
         $this->load->model('track_model');
         $this->track_model->kirim_data();
 
