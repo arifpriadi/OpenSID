@@ -101,14 +101,6 @@ class Database_model extends MY_Model
         $versi          = (int) str_replace('.', '', $this->cekCurrentVersion());
         $minimumVersi   = (int) str_replace('.', '', $this->minimumVersion);
         $currentVersion = currentVersion();
-        if (! PREMIUM) {
-            $versiSetara = SettingAplikasi::where(['key' => 'compatible_version_general'])->first()?->value;
-            if ($versiSetara) {
-                if ($currentVersion < $versiSetara) {
-                    show_error('<h2>OpenSID bisa diupgrade dengan minimal versi ' . $versiSetara . '</h2>');
-                }
-            }
-        }
 
         if (! $install && $versi < $minimumVersi) {
             show_error('<h2>Silakan upgrade dulu ke OpenSID dengan minimal versi ' . $this->minimumVersion . '</h2>');
