@@ -1526,7 +1526,8 @@ class Penduduk extends Admin_Controller
     public function impor()
     {
         if (config_item('demo_mode') || data_lengkap()) {
-            redirect($this->controller);
+            $msg = 'Tidak dapat melakukan impor pada mode demo atau data sudah dinyatakan lengkap';
+            redirect_with('error', $msg);
         }
 
         isCan('u');
@@ -1534,6 +1535,7 @@ class Penduduk extends Admin_Controller
         $data = [
             'form_action'          => ci_route('penduduk.proses_impor'),
             'boleh_hapus_penduduk' => $this->impor_model->boleh_hapus_penduduk(),
+            'formatImpor'          => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-impor-excel.xlsm')),
         ];
 
         return view('admin.penduduk.impor', $data);
@@ -1563,6 +1565,11 @@ class Penduduk extends Admin_Controller
         $data = [
             'form_action'          => ci_route('penduduk.proses_impor_bip'),
             'boleh_hapus_penduduk' => $this->impor_model->boleh_hapus_penduduk(),
+            'formatBip2012'        => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-bip-2012.xls')),
+            'formatBip2016'        => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-bip-2016.xls')),
+            'formatBipEktp'        => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-bip-ektp.xls')),
+            'formatBip2016Lutim'   => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-bip-2016-luwutimur.xls')),
+            'formatBipSiak'        => ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'format-siak.xls')),
         ];
 
         return view('admin.penduduk.impor_bip', $data);

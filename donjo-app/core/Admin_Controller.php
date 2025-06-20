@@ -130,6 +130,7 @@ class Admin_Controller extends MY_Controller
             ->count();
 
         if (! config_item('demo_mode')) {
+            // cek langganan premium
             $info_langganan = $this->cache->file->get_metadata('status_langganan');
 
             if (empty($info_langganan)

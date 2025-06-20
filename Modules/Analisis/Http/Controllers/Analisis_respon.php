@@ -96,7 +96,10 @@ class Analisis_respon extends AdminModulController
             return datatables()->of($sumberData)
                 ->addIndexColumn()
                 ->addColumn('aksi', static function ($row) use ($master): string {
-                    $aksi = '<a href="' . ci_route("analisis_respon.{$master}.form", $row->id) . '" class="btn bg-purple btn-sm" title="Input Data"><i class="fa fa-check-square-o"></i></a>';
+                    $aksi = '';
+                    if (can('u')) {
+                        $aksi .= '<a href="' . ci_route("analisis_respon.{$master}.form", $row->id) . '" class="btn bg-purple btn-sm" title="Input Data"><i class="fa fa-check-square-o"></i></a>';
+                    }
                     if ($row->bukti_pengesahan) {
                         $aksi .= ' <a href="' . base_url(LOKASI_PENGESAHAN . $row->bukti_pengesahan) . '" class="btn bg-olive btn-sm" title="Unduh Bukti Pengesahan" target="_blank"><i class="fa fa-paperclip"></i></a>';
                     }
@@ -287,6 +290,7 @@ class Analisis_respon extends AdminModulController
         isCan('u');
         $data['form_action']     = ci_route("analisis_respon.{$master}.impor_bdt");
         $data['analisis_master'] = $this->analisisMaster;
+        $data['formatImpor']     = ci_route('unduh', encrypt(DEFAULT_LOKASI_IMPOR . 'contoh-data-bdt2015.xlsx'));
 
         view('analisis_respon.import.impor_bdt', $data);
     }
@@ -304,10 +308,5 @@ class Analisis_respon extends AdminModulController
             DB::rollBack();
             redirect_with('error', 'Data gagal diimport ' . $e->getMessage(), ci_route('analisis_respon.' . $master));
         }
-    }
-
-    public function unduh_form_bdt(): void
-    {
-        header('location:' . base_url('assets/import/contoh-data-bdt2015.xls'));
     }
 }

@@ -89,6 +89,15 @@ class Gawai extends BaseModel
     ];
 
     /**
+     * The attributes that should be appended to the model.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'tipe' => self::GAWAI,
+    ];
+
+    /**
      * The relations to eager load on every query.
      *
      * @var array
@@ -118,17 +127,12 @@ class Gawai extends BaseModel
         return $this->hasOne(User::class, 'id', 'updated_by');
     }
 
-    public function setTipeAttribute($value)
-    {
-        $this->attributes['tipe'] = self::GAWAI;
-    }
-
     /**
      * Apply a global scope to only include active status.
      */
     protected static function booted()
     {
-        static::addGlobalScope('tipe', static function (Builder $builder) {
+        static::addGlobalScope('tipe', static function (Builder $builder): void {
             $builder->where('tipe', self::GAWAI);
         });
     }
